@@ -2,8 +2,8 @@
 <html>
 <head>
 
-<title>Mein Online Shop</title>
 <meta charset="UTF-8">
+<title>Mein Online Shop</title>
 
 <link rel="stylesheet" href="style.css">
 
@@ -16,11 +16,18 @@
 <header>
 
 <h1>Mein Online Shop</h1>
-<p>Willkommen in meinem Store</p>
+
+<input id="search" placeholder="Produkt suchen">
+
+<select id="categoryFilter">
+<option value="all">Alle Kategorien</option>
+<option value="kleidung">Kleidung</option>
+<option value="accessoires">Accessoires</option>
+</select>
 
 </header>
 
-<div class="products" id="products"></div>
+<div id="products" class="products"></div>
 
 <h2>Warenkorb</h2>
 
@@ -28,19 +35,13 @@
 
 <p id="total"></p>
 
-<h2>Bestellung</h2>
+<select id="shipping">
 
-<form id="orderForm">
+<option value="0">Digital / kostenlos</option>
+<option value="5">Standard Versand 5€</option>
+<option value="10">Express Versand 10€</option>
 
-<input placeholder="Name" required>
-
-<input placeholder="Email" required>
-
-<input placeholder="Adresse" required>
-
-<button type="submit">Bestellen</button>
-
-</form>
+</select>
 
 <div id="paypal-button-container"></div>
 
