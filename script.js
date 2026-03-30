@@ -1,18 +1,24 @@
-let products=[
+let products=JSON.parse(localStorage.getItem("products"))||[
 
-{name:"T-Shirt",price:20,img:"https://picsum.photos/200?1"},
-
-{name:"Hoodie",price:40,img:"https://picsum.photos/200?2"},
-
-{name:"Cap",price:15,img:"https://picsum.photos/200?3"}
+{name:"T-Shirt",price:20,cat:"kleidung",img:"https://picsum.photos/200?1"},
+{name:"Hoodie",price:40,cat:"kleidung",img:"https://picsum.photos/200?2"},
+{name:"Cap",price:15,cat:"accessoires",img:"https://picsum.photos/200?3"}
 
 ];
 
 let cart=[];
 
-let productsDiv=document.getElementById("products");
+function renderProducts(){
 
-products.forEach((p,index)=>{
+let container=document.getElementById("products");
+container.innerHTML="";
+
+let search=document.getElementById("search").value.toLowerCase();
+let cat=document.getElementById("categoryFilter").value;
+
+products.forEach((p,i)=>{
+
+if((cat==="all"||p.cat===cat) && p.name.toLowerCase().includes(search)){
 
 let div=document.createElement("div");
 
@@ -26,17 +32,29 @@ div.innerHTML=`
 
 <p>${p.price}€</p>
 
-<button onclick="addToCart(${index})">In den Warenkorb</button>
+<button onclick="addToCart(${i})">Kaufen</button>
 
 `;
 
-productsDiv.appendChild(div);
+container.appendChild(div);
+
+}
 
 });
 
-function addToCart(index){
+}
 
-cart.push(products[index]);
+function addToCart(i){
+
+cart.push(products[i]);
+
+updateCart();
+
+}
+
+function removeItem(index){
+
+cart.splice(index,1);
 
 updateCart();
 
@@ -44,41 +62,52 @@ updateCart();
 
 function updateCart(){
 
-let cartList=document.getElementById("cart");
+let list=document.getElementById("cart");
 
-cartList.innerHTML="";
+list.innerHTML="";
 
 let total=0;
 
-cart.forEach(item=>{
+cart.forEach((item,i)=>{
 
 let li=document.createElement("li");
 
-li.innerText=item.name+" - "+item.price+"€";
+li.innerHTML=`
+${item.name} - ${item.price}€
+<button onclick="removeItem(${i})">X</button>
+`;
 
-cartList.appendChild(li);
+list.appendChild(li);
 
 total+=item.price;
 
 });
 
-document.getElementById("total").innerText="Gesamt: "+total+"€";
+let shipping=parseInt(document.getElementById("shipping").value);
+
+document.getElementById("total").innerText="Gesamt: "+(total+shipping)+"€";
 
 }
+
+document.getElementById("search").oninput=renderProducts;
+
+document.getElementById("categoryFilter").onchange=renderProducts;
+
+document.getElementById("shipping").onchange=updateCart;
+
+renderProducts();
 
 paypal.Buttons({
 
 createOrder:function(data,actions){
 
-let total=cart.reduce((sum,item)=>sum+item.price,0);
+let total=cart.reduce((sum,i)=>sum+i.price,0);
+
+let shipping=parseInt(document.getElementById("shipping").value);
 
 return actions.order.create({
 
-purchase_units:[{
-
-amount:{value:total}
-
-}]
+purchase_units:[{amount:{value:(total+shipping)}}]
 
 });
 
@@ -88,7 +117,13 @@ onApprove:function(data,actions){
 
 return actions.order.capture().then(function(details){
 
-alert("Danke für deinen Einkauf "+details.payer.name.given_name);
+alert("Danke "+details.payer.name.given_name);
+
+let orders=JSON.parse(localStorage.getItem("orders"))||[];
+
+orders.push(cart);
+
+localStorage.setItem("orders",JSON.stringify(orders));
 
 cart=[];
 
